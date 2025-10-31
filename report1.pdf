@@ -1,0 +1,28 @@
+1. A title
+2. Overview: Introduce your chosen sub-question
+3. Data and Methods: Show key tables or data summaries (head() of joined datasets)
+4. Map Visualization: Include the maps from your analysis
+5. Analysis: Interpret your findings. What patterns do you notice? How does your map help answer the
+main research question?
+
+Relationship between renewable energy use and EV registrations in 2023 
+Sub-question: Do states with higher renewable energy use also have more EV registrations in 2023?
+Please see report.qmd for tables, data summaries, and maps. 
+
+Analysis: 
+
+EV graph:
+The amount of EV registrations in California (above 30%) is very high compared to other states. Most are dark blue on the graph, showing that registrations are very low. I have converted the data into each state's share of registration within the US. 
+Most states are very low with California being the exception as mentioned earlier and Texas with a slightly higher share as well. 
+
+Renewable energy graph:
+I have converted the data into each state's share of renewable energy use within the US. As seen on the map, California and Texas once again stands out compared to others on the map as higher renewable energy users. 
+This positively correlates what we have seen earlier in the EV graph. 
+
+Therefore, we can conclude that states with higher renewable energy usage also have more EV registrations in 2023.
+
+How does the map help answer the main research question
+States that use more renewable energy have cleaner electricity since they use more renewable energy and less fossil fuels than others. 
+Since EVs run on electricity, those states produce fewer emissions.
+States that have a high EV adoption (registration) and high renewable energy use, it means that EVs there are powered by clean energy.
+(there may be other factors / other things that require high renewable energy use may also be used in these states but this could not be found/done with the data given)

@@ -8,27 +8,109 @@ format: typst
 ## **Part 0: libraries**
 
 ```{r}
+#install.packages("maps")
+#install.packages("sf")
+#install.packages("rnaturalearth")
 
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(readr)
+library(stringr)
+library(maps)
+library(sf)
+library(rnaturalearth)
+
+renew_2023 <- read.csv("data/renew-use-2023.csv")
+total_2023 <- read.csv("data/total-use-2023.csv")
+ev_2023 <- read.csv("data/ev-registrations-by-state-2023.csv")
 ```
 
 ## **Part 1:** **Defining Research Question**
 
-Chosen Question:
+Chosen Question: Do states with higher renewable energy use also have more EV registrations in 2023?
 
 ## **Part 2: Data Preparation and Cleaning**
 
 ```{r}
+#registrations: clean col1, take out firrst two rows, and edit the name of col1
+cleaned_ev <- ev_2023 |>
+    rename(state = electric.vehicle.registrations_by_state..2023.) |>
+    slice(3:n()) |> 
+    mutate(count_ev = str_replace_all(X, "\\D+", ""), count_ev = as.numeric(count_ev))|>
+    select(state, count_ev)  
+head(cleaned_ev)
+
+#renewable energy use: rename, clean numbers, match state names 
+cleaned_energy <- renew_2023 |>
+    rename(state = State, source = Energy_Source) |>
+    mutate(use = str_replace_all(Renewable_Use_2023, "\\D+", ""), use = as.numeric(use)) |>
+    select(state, source, use) |>
+    group_by(state) |>
+    mutate(total_use = sum(use)) |>
+    distinct(state, total_use, .keep_all = TRUE) |>
+    select(-source, -use)
+head(cleaned_energy)
+
+#editing the state values to match
+cleaned_energy$state <- toupper(cleaned_energy$state)
+#create table to join 
+state_table <- tibble(
+    state = state.abb,
+    state_full = state.name 
+)
+
+pre_combined <- left_join(cleaned_energy, state_table) 
+na_position <- which(is.na(pre_combined$state_full))
+pre_combined$state_full[na_position] <- c("District of Columbia", "Total")
+
+cleaned_energy_final <- pre_combined |>
+    ungroup() |>
+    select(-state) |>
+    rename(state = state_full)
+head(cleaned_energy_final)
+
+#cleaned_energy_final 
+#cleaned_ev
 
 ```
 
 ## **Part 3: Joining / Pivoting Datasets for Analysis**
 
 ```{r}
+new <- left_join(cleaned_ev, cleaned_energy_final)
+new <- new |>
+    mutate(percent_regis = count_ev / count_ev[52] * 100,
+    percent_use = total_use/total_use[52] * 100) 
 
+new <- slice(new, 1:n()-1)
+head(new)
 ```
 
 ## **Part 4: Mapping Visualization**
 
 ```{r}
+us_states <- ne_states(country = "united states of america", returnclass = "sf")
 
+us_joined <- us_states |>
+  left_join(new, by = c("name" = "state"))
+us_joined
+
+#ev plot
+ev_map <- ggplot(us_joined) +
+  geom_sf(aes(fill = percent_regis), color = "white") +
+  scale_fill_continuous(name = "EV Registration Share", na.value = "grey90") +
+  labs(title = "EV Registration Share by State (2023)") +
+  coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) +
+  theme_minimal()
+ev_map
+
+#energy use plot
+use_map <- ggplot(us_joined) +
+  geom_sf(aes(fill = percent_use), color = "white") +
+  scale_fill_continuous(name = "Renewable Energy Use Share", na.value = "grey90") +
+  labs(title = "Renewable Energy Use Share by State (2023)") +
+  coord_sf(xlim = c(-125, -66), ylim = c(24, 50), expand = FALSE) +
+  theme_minimal()
+use_map
 ```

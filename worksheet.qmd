@@ -4,16 +4,10 @@ format: typst
 
 # Lab 4 Worksheet - Practice
 
-* add something about loading a csv and having to use
-# Split the one column into four
-energy_raw <- separate(
-  energy_raw,
-  col = 1,
-  into = c("State", "2021", "2022", "2023"),
-  sep = ","
-)
-* make sure str extract is clear str_extract(.x, "\\d+\\.?\\d*")
-
+```{r}
+library(stringr)
+library(tidyverse)
+```
 #### Q1. Extract and clean text patterns from strings using regular expressions.
 
 You are given a messy dataset of energy sources with inconsistent units and spacing.
@@ -25,18 +19,19 @@ energy_sources <- c("Solar (MWh)", "Wind (GWh)", "Coal (MWh)", "Hydro (kWh)")
 a.  Use str_detect() to identify all energy sources that contain the substring "Wind" or "Hydro" (hint: use the \| operator in regex).
 
 ```{r}
-
+str_detect(energy_sources, "Wind|Hydro")
 ```
 
 b.  Extract the unit type (e.g., MWh, GWh, kWh) using str_extract(). Make sure your pattern handles extra spaces or hyphens.
 
 ```{r}
-
+str_extract(energy_sources, "MWh|GWh|kWh")
 ```
 
 c.  Clean the names to keep only the energy source name, trimming whitespace and removing parentheses.
 
 ```{r}
+?str_replace()
 
 ```
 
@@ -76,20 +71,23 @@ states
 a.  Perform a left join to combine socioeconomic and regional data.
 
 ```{r}
-
+left_join(x=states, y=regions, by=join_by(state == state))
 ```
 
 b.  Perform an inner join. How many rows remain, and why is it the same or different?
 
 ```{r}
-
+inner <- inner_join(x=states, y=regions)
+dim(inner)
 ```
 
 
 c.  Perform an anti join to check if any state names don’t match between datasets. What might cause mismatches like this in real projects?
 
 ```{r}
-
+anti_join(x=states, y=regions)
+#none
+#typos 
 ```
 
 d.  Discussion: Why would you prefer a left join over an inner join when merging state-level datasets?\
@@ -97,7 +95,12 @@ d.  Discussion: Why would you prefer a left join over an inner join when merging
 e. Use pivot_longer() to make the socioeconomic data longer.\
 
 ```{r}
+#d: left join. those do not have a matching are excluded so there'll be missing data if any typos occur when using inner_join. however, those rows/columns would be kept if using left_join.
 
+#e
+pivot_longer(states, c("Income", "Population", "Illiteracy"), names_to = "numbers", values_to = "values")
+
+?pivot_longer()
 ```
 
 #### Q2.5.
